@@ -1,4 +1,6 @@
-package nz.co.redice.mygrocerylist.domain.usecases
+package nz.co.redice.mygrocerylist.domain
+
+import nz.co.redice.mygrocerylist.domain.GroceryItem
 
 interface  GroceryListRepository {
 
@@ -6,7 +8,7 @@ interface  GroceryListRepository {
 
     fun editGroceryItem(item: GroceryItem)
 
-    fun getGroceryItem(id: Int): GroceryItem
+    fun getGroceryItem(id: Int): GroceryItem?
 
     fun getGroceryList ():List <GroceryItem>
 
