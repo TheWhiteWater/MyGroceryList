@@ -1,4 +1,4 @@
-package nz.co.redice.mygrocerylist.domain.usecases
+package nz.co.redice.mygrocerylist.domain
 
 class GetGroceryListUseCase (private val repository: GroceryListRepository){
 
