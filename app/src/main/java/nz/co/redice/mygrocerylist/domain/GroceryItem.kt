@@ -3,7 +3,7 @@ package nz.co.redice.mygrocerylist.domain
 data class GroceryItem(
     val name: String,
     val count: Int,
-    val enabled: Boolean,
+    var enabled: Boolean = true,
     var id: Int = UNDEFINED_ID
 ) {
     companion object {

@@ -1,5 +1,6 @@
 package nz.co.redice.mygrocerylist.domain
 
+import androidx.lifecycle.LiveData
 import nz.co.redice.mygrocerylist.domain.GroceryItem
 
 interface  GroceryListRepository {
@@ -10,7 +11,7 @@ interface  GroceryListRepository {
 
     fun getGroceryItem(id: Int): GroceryItem?
 
-    fun getGroceryList ():List <GroceryItem>
+    fun getGroceryList ():LiveData <List<GroceryItem>>
 
     fun removeGroceryItem(item: GroceryItem)
 
