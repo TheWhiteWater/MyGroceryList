@@ -1,6 +1,6 @@
 package nz.co.redice.mygrocerylist.domain
 
-data class GroceryItem(
+data class Item(
     val name: String,
     val count: Int,
     var enabled: Boolean = true,

@@ -1,16 +1,17 @@
 package nz.co.redice.mygrocerylist.presentation
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import nz.co.redice.mygrocerylist.R
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var viewModel: MainViewModel
-    private lateinit var groceryListAdapter: GroceryListAdapter
+    private lateinit var listAdapter: ListAdapter
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,23 +19,28 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setupRecyclerView()
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
-        viewModel.groceryList.observe(this) {
-            groceryListAdapter.submitList(it)
+        viewModel.list.observe(this) {
+            listAdapter.submitList(it)
+        }
+
+        val buttonAddItem = findViewById<FloatingActionButton>(R.id.button_add_shop_item)
+        buttonAddItem.setOnClickListener {
+            startActivity(ItemActivity.newIntentAddItem(this))
         }
     }
 
     private fun setupRecyclerView() {
         val rvGroceryList = findViewById<RecyclerView>(R.id.rv_shop_list)
-        groceryListAdapter = GroceryListAdapter()
+        listAdapter = ListAdapter()
         with(rvGroceryList) {
-            adapter = groceryListAdapter
+            adapter = listAdapter
             recycledViewPool.setMaxRecycledViews(
-                GroceryListAdapter.ACTIVE_VIEW_TYPE,
-                GroceryListAdapter.MAX_PULL_SIZE
+                ListAdapter.ACTIVE_VIEW_TYPE,
+                ListAdapter.MAX_PULL_SIZE
             )
             recycledViewPool.setMaxRecycledViews(
-                GroceryListAdapter.INACTIVE_VIEW_TYPE,
-                GroceryListAdapter.MAX_PULL_SIZE
+                ListAdapter.INACTIVE_VIEW_TYPE,
+                ListAdapter.MAX_PULL_SIZE
             )
         }
         setupLongClickListener()
@@ -55,8 +61,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val item = groceryListAdapter.currentList[viewHolder.adapterPosition]
-                viewModel.removeGroceryItem(item)
+                val item = listAdapter.currentList[viewHolder.adapterPosition]
+                viewModel.removeItem(item)
             }
         }
         val itemTouchHelper = ItemTouchHelper(callback)
@@ -64,12 +70,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupClickListener() {
-        groceryListAdapter.onGroceryItemClickListener = {
+        listAdapter.onGroceryItemClickListener = {
+            startActivity(ItemActivity.newIntentEditItem(this, it.id))
         }
     }
 
     private fun setupLongClickListener() {
-        this.groceryListAdapter.onGroceryItemLongClickListener = {
+        this.listAdapter.onGroceryItemLongClickListener = {
             viewModel.changeEnableState(it)
         }
     }
