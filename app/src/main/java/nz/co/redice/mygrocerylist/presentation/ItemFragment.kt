@@ -16,10 +16,7 @@ import com.google.android.material.textfield.TextInputLayout
 import nz.co.redice.mygrocerylist.R
 import nz.co.redice.mygrocerylist.domain.Item
 
-class ItemFragment(
-    private var screenMode: String = MODE_UNKNOWN,
-    private var itemId: Int = Item.UNDEFINED_ID
-) : Fragment() {
+class ItemFragment : Fragment() {
 
     private lateinit var viewModel: ItemViewModel
     private lateinit var tilName: TextInputLayout
@@ -28,18 +25,25 @@ class ItemFragment(
     private lateinit var etCount: EditText
     private lateinit var btnSave: Button
 
+    private var screenMode: String = MODE_UNKNOWN
+    private var itemId: Int = Item.UNDEFINED_ID
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        parseParams()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        arguments
         return inflater.inflate(R.layout.fragment_item, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        parseParams()
-        viewModel = ViewModelProvider(this).get(ItemViewModel::class.java)
+          viewModel = ViewModelProvider(this).get(ItemViewModel::class.java)
         initViews(view)
         addTextChangeListeners()
         selectScreenMode()
@@ -92,7 +96,6 @@ class ItemFragment(
         etCount.addTextChangedListener {
             object : TextWatcher {
                 override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-
                 }
 
                 override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -124,10 +127,21 @@ class ItemFragment(
     }
 
     private fun parseParams() {
-        if (screenMode != MODE_EDIT && screenMode != MODE_ADD)
-            throw RuntimeException("Param screen mode is absent. Screen mode - $screenMode")
-        if (screenMode == MODE_EDIT && itemId == Item.UNDEFINED_ID)
-            throw RuntimeException("Param item id is absent")
+        val args = requireArguments()
+        if (!args.containsKey(SCREEN_MODE)) {
+            throw RuntimeException ("Param screen mode is absent!")
+        }
+        val sentMode = args.getString(SCREEN_MODE)
+        if (sentMode != MODE_EDIT && sentMode != MODE_ADD)
+            throw RuntimeException("Unknown screen mode: $sentMode")
+        screenMode = sentMode
+
+        if (screenMode == MODE_EDIT) {
+            if (!args.containsKey(ITEM_ID)) {
+                throw RuntimeException("Intent launched in edit mode, but ITEM ID is absent")
+            }
+            itemId = args.getInt(ITEM_ID, Item.UNDEFINED_ID)
+        }
     }
 
     private fun initViews(view: View) {
@@ -139,17 +153,29 @@ class ItemFragment(
     }
 
     companion object {
+        private const val MODE_UNKNOWN: String = "unknown_mode"
+        private const val SCREEN_MODE = "screen_mode"
         private const val MODE_ADD = "mode_add"
         private const val MODE_EDIT = "mode_edit"
-        private const val MODE_UNKNOWN = ""
+        private const val ITEM_ID: String = "item_id"
+
 
         fun newInstanceAddItem(): ItemFragment {
-            return ItemFragment(MODE_ADD)
+            return ItemFragment().apply {
+                arguments = Bundle().apply {
+                    putString(SCREEN_MODE, MODE_ADD)
+                }
+            }
         }
 
         fun newInstanceEditItem(itemId: Int): ItemFragment {
             Log.d("APPP", "newInstanceEditItem: $MODE_EDIT")
-            return ItemFragment(MODE_EDIT, itemId)
+            return ItemFragment().apply {
+                arguments = Bundle().apply {
+                    putString(SCREEN_MODE, MODE_EDIT)
+                    putInt(ITEM_ID, itemId)
+                }
+            }
         }
 
     }

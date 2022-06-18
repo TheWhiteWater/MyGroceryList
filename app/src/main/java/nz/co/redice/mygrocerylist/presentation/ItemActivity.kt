@@ -2,8 +2,8 @@ package nz.co.redice.mygrocerylist.presentation
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import nz.co.redice.mygrocerylist.R
 import nz.co.redice.mygrocerylist.domain.Item
 
@@ -16,7 +16,9 @@ class ItemActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_item)
         parseIntent()
-        selectScreenMode()
+        if (savedInstanceState == null) {
+            selectScreenMode()
+        }
     }
 
 
@@ -27,7 +29,7 @@ class ItemActivity : AppCompatActivity() {
             else -> throw RuntimeException("Unknown screen mode $screenMode")
         }
         supportFragmentManager.beginTransaction()
-            .add(R.id.item_container, fragment)
+            .replace(R.id.item_container, fragment)
             .commit()
 
     }

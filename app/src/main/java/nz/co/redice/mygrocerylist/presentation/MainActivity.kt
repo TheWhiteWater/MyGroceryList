@@ -2,6 +2,9 @@ package nz.co.redice.mygrocerylist.presentation
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainer
+import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -12,11 +15,13 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var viewModel: MainViewModel
     private lateinit var listAdapter: ListAdapter
+    private var itemContainer: FragmentContainerView? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        itemContainer = findViewById(R.id.item_container)
         setupRecyclerView()
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         viewModel.list.observe(this) {
@@ -25,8 +30,23 @@ class MainActivity : AppCompatActivity() {
 
         val buttonAddItem = findViewById<FloatingActionButton>(R.id.button_add_shop_item)
         buttonAddItem.setOnClickListener {
-            startActivity(ItemActivity.newIntentAddItem(this))
+            if (isOnePaneMode()) {
+                startActivity(ItemActivity.newIntentAddItem(this))
+            } else {
+                launchFragment(ItemFragment.newInstanceAddItem())
+            }
         }
+    }
+
+    private fun isOnePaneMode(): Boolean {
+        return itemContainer == null
+    }
+
+    private fun launchFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.item_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun setupRecyclerView() {
@@ -71,7 +91,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupClickListener() {
         listAdapter.onGroceryItemClickListener = {
-            startActivity(ItemActivity.newIntentEditItem(this, it.id))
+            if (isOnePaneMode())
+                startActivity(ItemActivity.newIntentEditItem(this, it.id))
+            else
+                launchFragment(ItemFragment.newInstanceEditItem(it.id))
         }
     }
 
