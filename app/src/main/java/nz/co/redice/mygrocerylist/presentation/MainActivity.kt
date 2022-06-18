@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import nz.co.redice.mygrocerylist.R
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ItemFragment.OnEditingFinishedListener {
 
     private lateinit var viewModel: MainViewModel
     private lateinit var listAdapter: ListAdapter
@@ -102,5 +102,9 @@ class MainActivity : AppCompatActivity() {
         this.listAdapter.onGroceryItemLongClickListener = {
             viewModel.changeEnableState(it)
         }
+    }
+
+    override fun onEditingFinished() {
+        supportFragmentManager.popBackStack()
     }
 }

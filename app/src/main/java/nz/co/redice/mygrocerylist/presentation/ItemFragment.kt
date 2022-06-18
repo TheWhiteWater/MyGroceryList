@@ -1,5 +1,6 @@
 package nz.co.redice.mygrocerylist.presentation
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -28,6 +29,16 @@ class ItemFragment : Fragment() {
     private var screenMode: String = MODE_UNKNOWN
     private var itemId: Int = Item.UNDEFINED_ID
 
+    private lateinit var onEditingFinishedListener: OnEditingFinishedListener
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is OnEditingFinishedListener)
+            onEditingFinishedListener = context
+        else
+            throw RuntimeException ("Activity must implement OnEditingFinishedListener interface!")
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         parseParams()
@@ -43,7 +54,7 @@ class ItemFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-          viewModel = ViewModelProvider(this).get(ItemViewModel::class.java)
+        viewModel = ViewModelProvider(this).get(ItemViewModel::class.java)
         initViews(view)
         addTextChangeListeners()
         selectScreenMode()
@@ -69,7 +80,7 @@ class ItemFragment : Fragment() {
             tilCount.error = message
         }
         viewModel.shouldCloseScreen.observe(viewLifecycleOwner) {
-            activity?.onBackPressed()
+            onEditingFinishedListener.onEditingFinished()
         }
     }
 
@@ -129,7 +140,7 @@ class ItemFragment : Fragment() {
     private fun parseParams() {
         val args = requireArguments()
         if (!args.containsKey(SCREEN_MODE)) {
-            throw RuntimeException ("Param screen mode is absent!")
+            throw RuntimeException("Param screen mode is absent!")
         }
         val sentMode = args.getString(SCREEN_MODE)
         if (sentMode != MODE_EDIT && sentMode != MODE_ADD)
@@ -178,6 +189,11 @@ class ItemFragment : Fragment() {
             }
         }
 
+    }
+
+
+    interface OnEditingFinishedListener {
+        fun onEditingFinished()
     }
 
 }

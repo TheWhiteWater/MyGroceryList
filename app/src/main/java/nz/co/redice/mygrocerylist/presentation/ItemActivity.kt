@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import nz.co.redice.mygrocerylist.R
 import nz.co.redice.mygrocerylist.domain.Item
 
-class ItemActivity : AppCompatActivity() {
+class ItemActivity : AppCompatActivity(), ItemFragment.OnEditingFinishedListener {
 
     private var screenMode: String = MODE_UNKNOWN
     private var itemId: Int = Item.UNDEFINED_ID
@@ -71,5 +71,9 @@ class ItemActivity : AppCompatActivity() {
             intent.putExtra(EXTRA_SHOP_ITEM_ID, itemId)
             return intent
         }
+    }
+
+    override fun onEditingFinished() {
+        finish()
     }
 }
