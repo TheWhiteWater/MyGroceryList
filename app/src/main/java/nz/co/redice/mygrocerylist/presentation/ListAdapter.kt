@@ -1,16 +1,13 @@
 package nz.co.redice.mygrocerylist.presentation
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import nz.co.redice.mygrocerylist.R
-import nz.co.redice.mygrocerylist.domain.GroceryItem
+import nz.co.redice.mygrocerylist.domain.Item
 
-class GroceryListAdapter : ListAdapter<GroceryItem, GroceryItemViewHolder>(
-    GroceryItemDiffCallback()) {
+class ListAdapter : ListAdapter<Item, ItemViewHolder>(
+    ItemDiffCallback()) {
 
     companion object {
         const val ACTIVE_VIEW_TYPE = 1
@@ -18,10 +15,10 @@ class GroceryListAdapter : ListAdapter<GroceryItem, GroceryItemViewHolder>(
         const val MAX_PULL_SIZE = 15
     }
 
-    var onGroceryItemLongClickListener: ((GroceryItem) -> Unit)? = null
-    var onGroceryItemClickListener: ((GroceryItem) -> Unit)? = null
+    var onGroceryItemLongClickListener: ((Item) -> Unit)? = null
+    var onGroceryItemClickListener: ((Item) -> Unit)? = null
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GroceryItemViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
 
         val layoutId = when (viewType) {
             ACTIVE_VIEW_TYPE -> R.layout.item_shop_enabled
@@ -30,10 +27,10 @@ class GroceryListAdapter : ListAdapter<GroceryItem, GroceryItemViewHolder>(
         }
 
         val view = LayoutInflater.from(parent.context).inflate(layoutId, parent, false)
-        return GroceryItemViewHolder(view)
+        return ItemViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: GroceryItemViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val item = getItem(position)
         holder.itemView.setOnLongClickListener {
             onGroceryItemLongClickListener?.invoke(item)

@@ -1,40 +1,66 @@
 package nz.co.redice.mygrocerylist.presentation
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainer
+import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import nz.co.redice.mygrocerylist.R
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var viewModel: MainViewModel
-    private lateinit var groceryListAdapter: GroceryListAdapter
+    private lateinit var listAdapter: ListAdapter
+    private var itemContainer: FragmentContainerView? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        itemContainer = findViewById(R.id.item_container)
         setupRecyclerView()
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
-        viewModel.groceryList.observe(this) {
-            groceryListAdapter.submitList(it)
+        viewModel.list.observe(this) {
+            listAdapter.submitList(it)
         }
+
+        val buttonAddItem = findViewById<FloatingActionButton>(R.id.button_add_shop_item)
+        buttonAddItem.setOnClickListener {
+            if (isOnePaneMode()) {
+                startActivity(ItemActivity.newIntentAddItem(this))
+            } else {
+                launchFragment(ItemFragment.newInstanceAddItem())
+            }
+        }
+    }
+
+    private fun isOnePaneMode(): Boolean {
+        return itemContainer == null
+    }
+
+    private fun launchFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.item_container, fragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun setupRecyclerView() {
         val rvGroceryList = findViewById<RecyclerView>(R.id.rv_shop_list)
-        groceryListAdapter = GroceryListAdapter()
+        listAdapter = ListAdapter()
         with(rvGroceryList) {
-            adapter = groceryListAdapter
+            adapter = listAdapter
             recycledViewPool.setMaxRecycledViews(
-                GroceryListAdapter.ACTIVE_VIEW_TYPE,
-                GroceryListAdapter.MAX_PULL_SIZE
+                ListAdapter.ACTIVE_VIEW_TYPE,
+                ListAdapter.MAX_PULL_SIZE
             )
             recycledViewPool.setMaxRecycledViews(
-                GroceryListAdapter.INACTIVE_VIEW_TYPE,
-                GroceryListAdapter.MAX_PULL_SIZE
+                ListAdapter.INACTIVE_VIEW_TYPE,
+                ListAdapter.MAX_PULL_SIZE
             )
         }
         setupLongClickListener()
@@ -55,8 +81,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val item = groceryListAdapter.currentList[viewHolder.adapterPosition]
-                viewModel.removeGroceryItem(item)
+                val item = listAdapter.currentList[viewHolder.adapterPosition]
+                viewModel.removeItem(item)
             }
         }
         val itemTouchHelper = ItemTouchHelper(callback)
@@ -64,12 +90,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupClickListener() {
-        groceryListAdapter.onGroceryItemClickListener = {
+        listAdapter.onGroceryItemClickListener = {
+            if (isOnePaneMode())
+                startActivity(ItemActivity.newIntentEditItem(this, it.id))
+            else
+                launchFragment(ItemFragment.newInstanceEditItem(it.id))
         }
     }
 
     private fun setupLongClickListener() {
-        this.groceryListAdapter.onGroceryItemLongClickListener = {
+        this.listAdapter.onGroceryItemLongClickListener = {
             viewModel.changeEnableState(it)
         }
     }

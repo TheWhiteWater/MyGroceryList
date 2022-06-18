@@ -1,27 +1,31 @@
 package nz.co.redice.mygrocerylist.presentation
 
-import androidx.lifecycle.MutableLiveData
+import android.util.Log
 import androidx.lifecycle.ViewModel
-import nz.co.redice.mygrocerylist.data.GroceryListRepositoryImpl
-import nz.co.redice.mygrocerylist.data.GroceryListRepositoryImpl.getGroceryList
+import nz.co.redice.mygrocerylist.data.ListRepositoryImpl
 import nz.co.redice.mygrocerylist.domain.*
 
 class MainViewModel : ViewModel() {
-    private val repository = GroceryListRepositoryImpl
-    private val getGroceryListUseCase = GetGroceryListUseCase(repository)
-    private val removeGroceryItemUseCase = RemoveGroceryItemUseCase(repository)
-    private val editGroceryItemUseCase = EditGroceryItemUseCase(repository)
+    private val repository = ListRepositoryImpl
+    private val getListUseCase = GetListUseCase(repository)
+    private val removeItemUseCase = RemoveItemUseCase(repository)
+    private val editItemUseCase = EditItemUseCase(repository)
+    private val addItemUseCase = AddItemUseCase(repository)
 
-    val groceryList = getGroceryListUseCase.getGroceryList()
+    val list = getListUseCase.getList()
 
 
-    fun removeGroceryItem(item: GroceryItem) {
-        removeGroceryItemUseCase.removeGroceryItem(item)
+    fun removeItem(item: Item) {
+        removeItemUseCase.removeItem(item)
     }
 
-    fun changeEnableState(item: GroceryItem) {
+    fun changeEnableState(item: Item) {
         val newItem = item.copy(enabled = !item.enabled)
-        editGroceryItemUseCase.editGroceryItem(newItem)
+        editItemUseCase.editItem(newItem)
     }
 
+    fun addItem(inputName: String, inputCount: Int) {
+        val parsedItem = Item(inputName, inputCount)
+        addItemUseCase.addItem(parsedItem)
+    }
 }
