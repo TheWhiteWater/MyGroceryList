@@ -1,6 +1,5 @@
 package nz.co.redice.mygrocerylist.presentation
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import nz.co.redice.mygrocerylist.data.ListRepositoryImpl
 import nz.co.redice.mygrocerylist.domain.*

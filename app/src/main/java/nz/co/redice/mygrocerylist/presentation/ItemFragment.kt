@@ -15,16 +15,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textfield.TextInputLayout
 import nz.co.redice.mygrocerylist.R
+import nz.co.redice.mygrocerylist.databinding.FragmentItemBinding
 import nz.co.redice.mygrocerylist.domain.Item
 
 class ItemFragment : Fragment() {
 
     private lateinit var viewModel: ItemViewModel
-    private lateinit var tilName: TextInputLayout
-    private lateinit var tilCount: TextInputLayout
-    private lateinit var etName: EditText
-    private lateinit var etCount: EditText
-    private lateinit var btnSave: Button
+    private var _binding: FragmentItemBinding? = null
+    private val binding: FragmentItemBinding
+        get() = _binding ?: throw RuntimeException("FragmentItemBinding == null")
 
     private var screenMode: String = MODE_UNKNOWN
     private var itemId: Int = Item.UNDEFINED_ID
@@ -36,7 +35,7 @@ class ItemFragment : Fragment() {
         if (context is OnEditingFinishedListener)
             onEditingFinishedListener = context
         else
-            throw RuntimeException ("Activity must implement OnEditingFinishedListener interface!")
+            throw RuntimeException("Activity must implement OnEditingFinishedListener interface!")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,38 +46,22 @@ class ItemFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        arguments
-        return inflater.inflate(R.layout.fragment_item, container, false)
+    ): View {
+        _binding = FragmentItemBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this).get(ItemViewModel::class.java)
-        initViews(view)
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
         addTextChangeListeners()
         selectScreenMode()
         observeViewModel()
     }
 
     private fun observeViewModel() {
-        viewModel.errorInputName.observe(viewLifecycleOwner) {
-            val message = if (it) {
-                getString(R.string.error_input_name)
-            } else {
-                null
-            }
-            tilName.error = message
-        }
-
-        viewModel.errorInputCount.observe(viewLifecycleOwner) {
-            val message = if (it) {
-                getString(R.string.error_input_count)
-            } else {
-                null
-            }
-            tilCount.error = message
-        }
         viewModel.shouldCloseScreen.observe(viewLifecycleOwner) {
             onEditingFinishedListener.onEditingFinished()
         }
@@ -92,7 +75,7 @@ class ItemFragment : Fragment() {
     }
 
     private fun addTextChangeListeners() {
-        etName.addTextChangedListener(object : TextWatcher {
+        binding.etName.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
 
@@ -104,7 +87,7 @@ class ItemFragment : Fragment() {
             }
         })
 
-        etCount.addTextChangedListener {
+        binding.etCount.addTextChangedListener {
             object : TextWatcher {
                 override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 }
@@ -121,19 +104,15 @@ class ItemFragment : Fragment() {
     }
 
     private fun launchAddMode() {
-        btnSave.setOnClickListener {
-            viewModel.addItem(etName.text?.toString(), etCount.text?.toString())
+        binding.saveButton.setOnClickListener {
+            viewModel.addItem(binding.etName.text?.toString(), binding.etCount.text?.toString())
         }
     }
 
     private fun launchEditMode() {
         viewModel.getItem(itemId)
-        viewModel.item.observe(viewLifecycleOwner) {
-            etName.setText(it.name)
-            etCount.setText(it.count.toString())
-        }
-        btnSave.setOnClickListener {
-            viewModel.editItem(etName.text?.toString(), etCount.text?.toString())
+        binding.saveButton.setOnClickListener {
+            viewModel.editItem(binding.etName.text?.toString(), binding.etCount.text?.toString())
         }
     }
 
@@ -153,14 +132,8 @@ class ItemFragment : Fragment() {
             }
             itemId = args.getInt(ITEM_ID, Item.UNDEFINED_ID)
         }
-    }
 
-    private fun initViews(view: View) {
-        tilName = view.findViewById(R.id.til_name)
-        tilCount = view.findViewById(R.id.til_count)
-        etName = view.findViewById(R.id.et_name)
-        etCount = view.findViewById(R.id.et_count)
-        btnSave = view.findViewById(R.id.save_button)
+
     }
 
     companion object {
@@ -196,4 +169,8 @@ class ItemFragment : Fragment() {
         fun onEditingFinished()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

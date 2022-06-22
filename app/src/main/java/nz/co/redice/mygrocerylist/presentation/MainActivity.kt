@@ -3,33 +3,31 @@ package nz.co.redice.mygrocerylist.presentation
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentContainer
-import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import nz.co.redice.mygrocerylist.R
+import nz.co.redice.mygrocerylist.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), ItemFragment.OnEditingFinishedListener {
 
     private lateinit var viewModel: MainViewModel
     private lateinit var listAdapter: ListAdapter
-    private var itemContainer: FragmentContainerView? = null
+    private lateinit var binding: ActivityMainBinding
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        itemContainer = findViewById(R.id.item_container)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        binding.lifecycleOwner = this
+        setContentView(binding.root)
         setupRecyclerView()
         viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
         viewModel.list.observe(this) {
             listAdapter.submitList(it)
         }
 
-        val buttonAddItem = findViewById<FloatingActionButton>(R.id.button_add_shop_item)
-        buttonAddItem.setOnClickListener {
+        binding.buttonAddShopItem.setOnClickListener {
             if (isOnePaneMode()) {
                 startActivity(ItemActivity.newIntentAddItem(this))
             } else {
@@ -39,7 +37,7 @@ class MainActivity : AppCompatActivity(), ItemFragment.OnEditingFinishedListener
     }
 
     private fun isOnePaneMode(): Boolean {
-        return itemContainer == null
+        return binding.itemContainer == null
     }
 
     private fun launchFragment(fragment: Fragment) {
@@ -107,4 +105,6 @@ class MainActivity : AppCompatActivity(), ItemFragment.OnEditingFinishedListener
     override fun onEditingFinished() {
         supportFragmentManager.popBackStack()
     }
+
+
 }
