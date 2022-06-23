@@ -1,17 +1,23 @@
 package nz.co.redice.mygrocerylist.presentation
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import nz.co.redice.mygrocerylist.data.ListRepositoryImpl
 import nz.co.redice.mygrocerylist.domain.AddItemUseCase
 import nz.co.redice.mygrocerylist.domain.EditItemUseCase
 import nz.co.redice.mygrocerylist.domain.GetItemUseCase
 import nz.co.redice.mygrocerylist.domain.Item
 
-class ItemViewModel : ViewModel() {
+class ItemViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = ListRepositoryImpl
+    private val repository = ListRepositoryImpl(application)
     private val getItemUseCase = GetItemUseCase(repository)
     private val addItemUseCase = AddItemUseCase(repository)
     private val editItemUseCase = EditItemUseCase(repository)
@@ -31,14 +37,16 @@ class ItemViewModel : ViewModel() {
         get() = _item
 
 
-    fun getItem(itemId: Int) {
-        val item = getItemUseCase.getItem(itemId)
-        _item.value = item
-    }
-
-    private val _shouldCloseScreen =  MutableLiveData<Unit>()
+    private val _shouldCloseScreen = MutableLiveData<Unit>()
     val shouldCloseScreen: LiveData<Unit>
         get() = _shouldCloseScreen
+
+    fun getItem(itemId: Int) {
+        viewModelScope.launch {
+            val item = getItemUseCase.getItem(itemId)
+            _item.value = item
+        }
+    }
 
 
     fun addItem(inputName: String?, inputCount: String?) {
@@ -46,9 +54,11 @@ class ItemViewModel : ViewModel() {
         val count = parseItemCount(inputCount)
         val fieldsAreValid = validateInput(name, count)
         if (fieldsAreValid) {
-            val parsedItem = Item(name, count)
-            addItemUseCase.addItem(parsedItem)
-            finishWork()
+            viewModelScope.launch {
+                val parsedItem = Item(name, count)
+                addItemUseCase.addItem(parsedItem)
+                finishWork()
+            }
         }
     }
 
@@ -58,10 +68,12 @@ class ItemViewModel : ViewModel() {
         val fieldsAreValid = validateInput(parsedName, parsedCount)
         if (fieldsAreValid) {
             _item.value?.let {
-                val item = it.copy(name = parsedName, count = parsedCount )
-                editItemUseCase.editItem(item)
+                viewModelScope.launch {
+                    val item = it.copy(name = parsedName, count = parsedCount)
+                    editItemUseCase.editItem(item)
+                    finishWork()
+                }
             }
-            finishWork()
         }
     }
 
@@ -101,4 +113,6 @@ class ItemViewModel : ViewModel() {
     private fun finishWork() {
         _shouldCloseScreen.value = Unit
     }
+
+
 }

@@ -1,12 +1,10 @@
 package nz.co.redice.mygrocerylist.domain
 
-class EditItemUseCase (private val repository: ListRepository) {
+class EditItemUseCase(private val repository: ListRepository) {
 
-    fun editItem(item: Item) {
+    suspend  fun editItem(item: Item) {
         repository.editItem(item)
     }
-
-
 
 
 }
