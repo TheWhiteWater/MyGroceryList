@@ -1,56 +1,39 @@
 package nz.co.redice.mygrocerylist.data
 
-import android.util.Log
+import android.app.Application
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import nz.co.redice.mygrocerylist.domain.Item
 import nz.co.redice.mygrocerylist.domain.ListRepository
 import kotlin.random.Random
 
-object ListRepositoryImpl : ListRepository {
+class ListRepositoryImpl(application: Application) : ListRepository {
 
-    private val listLD = MutableLiveData<List<Item>>()
-    private val list = sortedSetOf<Item>({ o1, o2 -> o1.id.compareTo(o2.id) })
-    private var autoIncrementId = 0
+    private val itemListDAO = AppDatabase.getInstance(application).itemListDao()
+    private val mapper = ItemListMapper()
 
-    init {
-        for (i in 0 until 5) {
-            val item = Item("Name $i", count = i, enabled = Random.nextBoolean())
-            addItem(item)
-        }
-    }
 
     override fun addItem(item: Item) {
-        if (item.id == Item.UNDEFINED_ID) {
-            item.id = autoIncrementId++
-        }
-        list.add(item)
-        updateList()
+        itemListDAO.addItem(mapper.mapEntityToDbModel(item))
     }
 
     override fun editItem(item: Item) {
-        val oldItem = getItem(item.id)
-        list.remove(oldItem)
         addItem(item)
-        updateList()
-    }
-
-    override fun getItem(id: Int): Item? {
-        return list.find { it.id == id }
-            ?: throw RuntimeException("Element with id $id not found")
-    }
-
-    override fun getList(): LiveData<List<Item>> {
-        updateList()
-        return listLD
     }
 
     override fun removeItem(item: Item) {
-        list.remove(item)
-        updateList()
+        itemListDAO.deleteItem(item.id)
     }
 
-    private fun updateList() {
-        listLD.value = list.toList()
+    override fun getItem(id: Int): Item {
+        val dbModel = itemListDAO.getItem(id)
+        return mapper.mapDbModelToEntity(dbModel)
     }
+
+    override fun getList(): LiveData<List<Item>> = Transformations.map(itemListDAO.getItemList()) {
+        mapper.mapListDbModelToListEntity(it)
+    }
+
 }

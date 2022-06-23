@@ -1,5 +1,6 @@
 package nz.co.redice.mygrocerylist.domain
 
+
 data class Item(
     val name: String,
     val count: Int,
@@ -7,7 +8,7 @@ data class Item(
     var id: Int = UNDEFINED_ID
 ) {
     companion object {
-        const val UNDEFINED_ID = -1
+        const val UNDEFINED_ID = 0
     }
 
 
