@@ -13,13 +13,13 @@ interface ItemListDAO {
     fun getItemList(): LiveData<List<ItemDbModel>>
 
     @Query("SELECT * FROM shop_items WHERE id=:itemId LIMIT 1")
-     fun getItem(itemId: Int): ItemDbModel
+    suspend fun getItem(itemId: Int): ItemDbModel
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-     fun addItem(item: ItemDbModel)
+    suspend fun addItem(item: ItemDbModel)
 
     @Query("DELETE FROM shop_items WHERE id=:itemId")
-     fun deleteItem(itemId: Int)
+    suspend fun deleteItem(itemId: Int)
 
 
 }

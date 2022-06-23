@@ -3,6 +3,7 @@ package nz.co.redice.mygrocerylist.presentation
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -19,13 +20,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val list = getListUseCase.getList()
 
     fun removeItem(item: Item) {
+        viewModelScope.launch {
             removeItemUseCase.removeItem(item)
+        }
     }
 
     fun changeEnableState(item: Item) {
+        viewModelScope.launch {
             val newItem = item.copy(enabled = !item.enabled)
             editItemUseCase.editItem(newItem)
+        }
     }
-
 
 }

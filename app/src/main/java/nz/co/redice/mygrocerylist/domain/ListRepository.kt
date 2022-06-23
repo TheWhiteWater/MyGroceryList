@@ -2,10 +2,10 @@ package nz.co.redice.mygrocerylist.domain
 
 import androidx.lifecycle.LiveData
 
-interface  ListRepository {
-    fun addItem (item: Item)
-    fun editItem(item: Item)
-    fun getItem(id: Int): Item
-    fun removeItem(item: Item)
-    fun getList ():LiveData <List<Item>>
+interface ListRepository {
+    suspend fun addItem(item: Item)
+    suspend fun editItem(item: Item)
+    suspend fun getItem(id: Int): Item
+    suspend fun removeItem(item: Item)
+    fun getList(): LiveData<List<Item>>
 }

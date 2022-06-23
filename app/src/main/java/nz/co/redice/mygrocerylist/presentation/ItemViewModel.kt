@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -21,7 +22,6 @@ class ItemViewModel(application: Application) : AndroidViewModel(application) {
     private val addItemUseCase = AddItemUseCase(repository)
     private val editItemUseCase = EditItemUseCase(repository)
     private val _errorInputName = MutableLiveData<Boolean>()
-
     val errorInputName: LiveData<Boolean>
         get() {
             return _errorInputName
@@ -42,31 +42,37 @@ class ItemViewModel(application: Application) : AndroidViewModel(application) {
         get() = _shouldCloseScreen
 
     fun getItem(itemId: Int) {
+        viewModelScope.launch {
             val item = getItemUseCase.getItem(itemId)
             _item.value = item
+        }
     }
 
 
     fun addItem(inputName: String?, inputCount: String?) {
-            val name = parseItemName(inputName)
-            val count = parseItemCount(inputCount)
-            val fieldsAreValid = validateInput(name, count)
-            if (fieldsAreValid) {
+        val name = parseItemName(inputName)
+        val count = parseItemCount(inputCount)
+        val fieldsAreValid = validateInput(name, count)
+        if (fieldsAreValid) {
+            viewModelScope.launch {
                 val parsedItem = Item(name, count)
                 addItemUseCase.addItem(parsedItem)
                 finishWork()
+            }
         }
     }
 
     fun editItem(inputName: String?, inputCount: String?) {
-            val parsedName = parseItemName(inputName)
-            val parsedCount = parseItemCount(inputCount)
-            val fieldsAreValid = validateInput(parsedName, parsedCount)
-            if (fieldsAreValid) {
-                _item.value?.let {
+        val parsedName = parseItemName(inputName)
+        val parsedCount = parseItemCount(inputCount)
+        val fieldsAreValid = validateInput(parsedName, parsedCount)
+        if (fieldsAreValid) {
+            _item.value?.let {
+                viewModelScope.launch {
                     val item = it.copy(name = parsedName, count = parsedCount)
                     editItemUseCase.editItem(item)
-                finishWork()
+                    finishWork()
+                }
             }
         }
     }

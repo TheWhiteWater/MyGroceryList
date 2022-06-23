@@ -15,19 +15,18 @@ class ListRepositoryImpl(application: Application) : ListRepository {
     private val mapper = ItemListMapper()
 
 
-    override fun addItem(item: Item) {
+    override suspend  fun addItem(item: Item) {
         itemListDAO.addItem(mapper.mapEntityToDbModel(item))
     }
 
-    override fun editItem(item: Item) {
-        addItem(item)
-    }
+    override suspend  fun editItem(item: Item) {
+        itemListDAO.addItem(mapper.mapEntityToDbModel(item))    }
 
-    override fun removeItem(item: Item) {
+    override suspend  fun removeItem(item: Item) {
         itemListDAO.deleteItem(item.id)
     }
 
-    override fun getItem(id: Int): Item {
+    override suspend  fun getItem(id: Int): Item {
         val dbModel = itemListDAO.getItem(id)
         return mapper.mapDbModelToEntity(dbModel)
     }
