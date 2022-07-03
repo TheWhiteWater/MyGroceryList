@@ -1,8 +1,9 @@
 package nz.co.redice.mygrocerylist.data
 
 import nz.co.redice.mygrocerylist.domain.Item
+import javax.inject.Inject
 
-class ItemListMapper {
+class ItemListMapper @Inject constructor() {
 
     fun mapEntityToDbModel(item: Item): ItemDbModel {
         return ItemDbModel(

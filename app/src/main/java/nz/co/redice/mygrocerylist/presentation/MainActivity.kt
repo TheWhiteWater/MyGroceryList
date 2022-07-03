@@ -8,6 +8,9 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import nz.co.redice.mygrocerylist.R
 import nz.co.redice.mygrocerylist.databinding.ActivityMainBinding
+import nz.co.redice.mygrocerylist.di.ItemApplication
+import nz.co.redice.mygrocerylist.domain.ViewModelFactory
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), ItemFragment.OnEditingFinishedListener {
 
@@ -15,14 +18,21 @@ class MainActivity : AppCompatActivity(), ItemFragment.OnEditingFinishedListener
     private lateinit var listAdapter: ListAdapter
     private lateinit var binding: ActivityMainBinding
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
+    private val component by lazy {
+        (application as ItemApplication).component
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        component.inject(this)
         binding = ActivityMainBinding.inflate(layoutInflater)
         binding.lifecycleOwner = this
         setContentView(binding.root)
         setupRecyclerView()
-        viewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
         viewModel.list.observe(this) {
             listAdapter.submitList(it)
         }

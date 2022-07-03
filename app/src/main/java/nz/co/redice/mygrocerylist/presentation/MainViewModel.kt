@@ -1,21 +1,20 @@
 package nz.co.redice.mygrocerylist.presentation
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import nz.co.redice.mygrocerylist.data.ListRepositoryImpl
-import nz.co.redice.mygrocerylist.domain.*
+import nz.co.redice.mygrocerylist.domain.EditItemUseCase
+import nz.co.redice.mygrocerylist.domain.GetListUseCase
+import nz.co.redice.mygrocerylist.domain.Item
+import nz.co.redice.mygrocerylist.domain.RemoveItemUseCase
+import javax.inject.Inject
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository = ListRepositoryImpl(application)
-    private val getListUseCase = GetListUseCase(repository)
-    private val removeItemUseCase = RemoveItemUseCase(repository)
-    private val editItemUseCase = EditItemUseCase(repository)
+class MainViewModel @Inject constructor(
+    private val getListUseCase: GetListUseCase,
+    private val removeItemUseCase: RemoveItemUseCase,
+    private val editItemUseCase: EditItemUseCase
+) : ViewModel() {
+
 
     val list = getListUseCase.getList()
 

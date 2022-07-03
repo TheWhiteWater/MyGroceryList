@@ -16,7 +16,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textfield.TextInputLayout
 import nz.co.redice.mygrocerylist.R
 import nz.co.redice.mygrocerylist.databinding.FragmentItemBinding
+import nz.co.redice.mygrocerylist.di.ItemApplication
 import nz.co.redice.mygrocerylist.domain.Item
+import nz.co.redice.mygrocerylist.domain.ViewModelFactory
+import javax.inject.Inject
 
 class ItemFragment : Fragment() {
 
@@ -30,7 +33,16 @@ class ItemFragment : Fragment() {
 
     private lateinit var onEditingFinishedListener: OnEditingFinishedListener
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
+    private val component by lazy {
+        (requireActivity().application as ItemApplication).component
+    }
+
+
     override fun onAttach(context: Context) {
+        component.inject(this)
         super.onAttach(context)
         if (context is OnEditingFinishedListener)
             onEditingFinishedListener = context
@@ -53,7 +65,7 @@ class ItemFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this).get(ItemViewModel::class.java)
+        viewModel = ViewModelProvider(this, viewModelFactory)[ItemViewModel::class.java]
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
         addTextChangeListeners()

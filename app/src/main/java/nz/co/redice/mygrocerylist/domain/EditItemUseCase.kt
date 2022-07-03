@@ -1,6 +1,8 @@
 package nz.co.redice.mygrocerylist.domain
 
-class EditItemUseCase(private val repository: ListRepository) {
+import javax.inject.Inject
+
+class EditItemUseCase @Inject constructor(private val repository: ListRepository) {
 
     suspend  fun editItem(item: Item) {
         repository.editItem(item)

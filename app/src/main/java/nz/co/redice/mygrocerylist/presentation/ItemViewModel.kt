@@ -1,26 +1,22 @@
 package nz.co.redice.mygrocerylist.presentation
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import nz.co.redice.mygrocerylist.data.ListRepositoryImpl
 import nz.co.redice.mygrocerylist.domain.AddItemUseCase
 import nz.co.redice.mygrocerylist.domain.EditItemUseCase
 import nz.co.redice.mygrocerylist.domain.GetItemUseCase
 import nz.co.redice.mygrocerylist.domain.Item
+import javax.inject.Inject
 
-class ItemViewModel(application: Application) : AndroidViewModel(application) {
+class ItemViewModel @Inject constructor(
+    private val getItemUseCase: GetItemUseCase,
+    private val addItemUseCase: AddItemUseCase,
+    private val editItemUseCase: EditItemUseCase
+) : ViewModel() {
 
-    private val repository = ListRepositoryImpl(application)
-    private val getItemUseCase = GetItemUseCase(repository)
-    private val addItemUseCase = AddItemUseCase(repository)
-    private val editItemUseCase = EditItemUseCase(repository)
     private val _errorInputName = MutableLiveData<Boolean>()
     val errorInputName: LiveData<Boolean>
         get() {
